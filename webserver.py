@@ -4,7 +4,7 @@ import threading
 
 # Konfigurasi Network Server
 HOST = '127.0.0.1'  # Localhost
-PORT = 8080        # Port sesuai di halaman Config UI
+PORT = 8000        # Port sesuai di halaman Config UI
 
 def handle_client(client_socket, client_address):
     print(f"[CONNECT] Koneksi diterima dari IP Client: {client_address[0]}:{client_address[1]}")
