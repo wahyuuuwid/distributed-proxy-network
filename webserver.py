@@ -4,53 +4,74 @@ import threading
 
 # Konfigurasi Network Server
 HOST = '127.0.0.1'  # Localhost
-PORT = 8080        # Port sesuai di halaman Config UI
+PORT = 8080        # Port akses
+
+# Fungsi untuk mendeteksi tipe file (MIME Type) berdasarkan eksternsinya
+def get_content_type(filepath):
+    if filepath.endswith('.html') or filepath.endswith('.htm'):
+        return "text/html; charset=utf-8"
+    elif filepath.endswith('.css'):
+        return "text/css"
+    elif filepath.endswith('.png'):
+        return "image/png"
+    elif filepath.endswith('.jpg') or filepath.endswith('.jpeg'):
+        return "image/jpeg"
+    elif filepath.endswith('.mp4'):
+        return "video/mp4"
+    else:
+        return "application/octet-stream"
 
 def handle_client(client_socket, client_address):
     print(f"[CONNECT] Koneksi diterima dari IP Client: {client_address[0]}:{client_address[1]}")
     
     try:
-        # Menerima request dari browser (max buffer 4096 bytes)
         request = client_socket.recv(4096).decode('utf-8')
         if not request:
             client_socket.close()
             return
 
-        # Parsing baris pertama request untuk mengambil file yang diminta
+        # Parsing file yang diminta oleh browser
         first_line = request.split('\n')[0]
         requested_file = first_line.split(' ')[1]
         
-        # Jika client mengakses akar (/) atau localhost:8080, arahkan ke index.html
+        # Atur routing utama ke dalam folder HTML
         if requested_file == '/' or requested_file == '/index.html':
-            filename = 'index.html'
+            filepath = os.path.join('HTML', 'index.html')
         else:
-            filename = requested_file.lstrip('/')
+            # Mengamankan path dan mengarahkannya ke dalam subfolder 'HTML'
+            clean_path = requested_file.lstrip('/')
+            filepath = os.path.join('HTML', clean_path)
 
-        print(f"[REQUEST] Client meminta asset: /{filename}")
+        print(f"[REQUEST] Client meminta path file: {filepath}")
 
-        # Mengecek apakah file yang diminta ada di dalam folder
-        if os.path.exists(filename) and os.path.isfile(filename):
-            with open(filename, 'rb') as f:
+        # Mengecek apakah file beneran ada di folder HTML
+        if os.path.exists(filepath) and os.path.isfile(filepath):
+            # Tentukan tipe konten (HTML/CSS/Gambar/Video)
+            content_type = get_content_type(filepath)
+            
+            # Membaca konten file secara biner (rb) agar support gambar/video
+            with open(filepath, 'rb') as f:
                 content = f.read()
             
-            # Membuat HTTP Response Header Sukses (200 OK)
+            # Membuat HTTP Response Header yang sesuai dengan spek browser
             response_header = "HTTP/1.1 200 OK\r\n"
-            response_header += "Content-Type: text/html; charset=utf-8\r\n"
+            response_header += f"Content-Type: {content_type}\r\n"
             response_header += f"Content-Length: {len(content)}\r\n"
             response_header += "Connection: close\r\n\r\n"
             
+            # Kirim header beserta data binernya
             client_socket.sendall(response_header.encode('utf-8') + content)
-            print(f"[SUCCESS] HTTP/1.1 200 OK Served - /{filename} ({len(content)} bytes)")
+            print(f"[SUCCESS] 200 OK Sent - {filepath} ({content_type})")
         else:
-            # Jika file tidak ditemukan, kirim Response HTTP 404 Not Found
-            not_found_msg = "<h1>404 Not Found</h1><p>File yang kamu cari tidak ada di Web Server ini.</p>"
+            # Respons 404 jika file tidak ditemukan
+            not_found_msg = "<h1>404 Not Found</h1><p>File tugas jarkom tidak ditemukan di folder HTML.</p>"
             response_header = "HTTP/1.1 404 Not Found\r\n"
             response_header += "Content-Type: text/html\r\n"
             response_header += f"Content-Length: {len(not_found_msg)}\r\n"
             response_header += "Connection: close\r\n\r\n"
             
             client_socket.sendall(response_header.encode('utf-8') + not_found_msg.encode('utf-8'))
-            print(f"[ERROR] HTTP/1.1 404 Not Found - /{filename}")
+            print(f"[ERROR] 404 Not Found - {filepath}")
 
     except Exception as e:
         print(f"[EXCEPTION] Terjadi kesalahan data: {e}")
@@ -59,19 +80,16 @@ def handle_client(client_socket, client_address):
         print(f"[DISCONNECT] Koneksi dengan {client_address[0]} selesai.\n")
 
 def main():
-    # Membuat socket TCP/IP untuk Web Server
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # Membuat socket TCP/IP
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     
     try:
         server_socket.bind((HOST, PORT))
         server_socket.listen(5)
-        
-        # Cek Ctrl+C 
         server_socket.settimeout(1.0) 
         
-        print(f"[INFO] Web Server berhasil dijalankan di http://{HOST}:{PORT}")
-        print("[INFO] Menunggu request masuk dari client browser (Tekan Ctrl+C untuk matiin)...\n")
+        print(f"[INFO] Web Server Jarkom berjalan di http://{HOST}:{PORT}")
+        print("[INFO] Menunggu request dari browser... (Tekan Ctrl+C untuk mematikan)\n")
         
         while True:
             try:
@@ -79,11 +97,10 @@ def main():
                 client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
                 client_thread.start()
             except socket.timeout:
-                # Mengabaikan timeout internal 1 detik agar loop terus berjalan mencari Ctrl+C
                 continue
                 
     except KeyboardInterrupt:
-        print("\n[SHUTDOWN] Mematikan sistem Web Server. Sampai jumpa!")
+        print("\n[SHUTDOWN] Mematikan sistem Web Server. Semangat tubesnya!")
     finally:
         server_socket.close()
 

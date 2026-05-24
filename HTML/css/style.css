@@ -1,0 +1,306 @@
+/* ===============================
+   1. VARIABLES
+================================ */
+:root {
+    --primary: #1e3a8a;
+    --secondary: #764ba2;
+    --accent: #facc15;
+
+    --bg-gradient: linear-gradient(135deg, #667eea, #764ba2);
+
+    --text-main: #1f2937;
+    --text-muted: #64748b;
+    --white: #ffffff;
+
+    --radius-lg: 16px;
+    --radius-md: 12px;
+
+    --shadow-sm: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-md: 0 10px 15px rgba(0,0,0,0.1);
+}
+
+/* ===============================
+   2. RESET
+================================ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    min-height: 100vh;
+}
+
+/* ===============================
+   3. DARK MODE
+================================ */
+body.dark {
+    background: #0f172a;
+    color: #e2e8f0;
+}
+
+body.dark header,
+body.dark .card,
+body.dark .box {
+    background: #1e293b;
+    color: #e2e8f0;
+}
+
+/* ===============================
+   4. HEADER
+================================ */
+header {
+    background: var(--white);
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+}
+
+header h1 {
+    color: var(--primary);
+}
+
+/* ===============================
+   5. NAVBAR
+================================ */
+nav {
+    background: rgba(30, 58, 138, 0.9);
+    padding: 15px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+}
+
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a.active {
+    color: var(--accent);
+}
+
+/* ===============================
+   6. HERO
+================================ */
+.hero {
+    text-align: center;
+    color: white;
+    padding: 80px 20px;
+}
+
+/* ===============================
+   7. CARD
+================================ */
+.card {
+    background: white;
+    margin: 30px auto;
+    padding: 40px;
+    border-radius: var(--radius-lg);
+    max-width: 900px;
+    box-shadow: var(--shadow-md);
+    transition: 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* ===============================
+   8. GRID & BOX
+================================ */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    padding: 20px;
+    max-width: 1200px;
+    margin: auto;
+}
+
+.box {
+    background: white;
+    padding: 30px;
+    border-radius: var(--radius-lg);
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+    transition: 0.3s;
+}
+
+.box:hover {
+    transform: translateY(-8px);
+}
+
+/* ===============================
+   9. BUTTON
+================================ */
+.btn {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--primary);
+    padding: 12px 25px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ===============================
+   10. MEDIA
+================================ */
+.img-center {
+    display: block;
+    max-width: 100%;
+    margin: 20px auto;
+    border-radius: var(--radius-md);
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+}
+
+.video-container iframe {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.video-player {
+    width: 100%;
+    max-width: 800px;
+    display: block;
+    margin: 20px auto;
+    border-radius: 12px;
+}
+
+/* ===============================
+   11. INTERACTIVE BOX
+================================ */
+.osi-interactive div,
+.tcpip-interactive div,
+.qos-interactive div,
+.step-box {
+    background: #e0e7ff;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    margin: 5px;
+    transition: 0.3s;
+}
+
+.step-box:hover {
+    background: #c7d2fe;
+}
+
+/* ACTIVE */
+.active-box {
+    background: #a5b4fc !important;
+}
+
+/* ===============================
+   12. PACKET FLOW 🔥
+================================ */
+.packet-flow {
+    position: relative;
+    margin: 40px auto;
+    max-width: 700px;
+    height: 120px;
+}
+
+.node {
+    position: absolute;
+    top: 40px;
+    width: 120px;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+}
+
+.client { left: 0; }
+.server { right: 0; }
+
+.packet {
+    position: absolute;
+    top: 55px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+/* request */
+.packet.request {
+    background: #38bdf8;
+    animation: moveRight 2s linear infinite;
+}
+
+/* response */
+.packet.response {
+    background: #4ade80;
+    animation: moveLeft 2s linear infinite;
+}
+
+@keyframes moveRight {
+    0% { left: 120px; }
+    100% { left: calc(100% - 140px); }
+}
+
+@keyframes moveLeft {
+    0% { left: calc(100% - 140px); }
+    100% { left: 120px; }
+}
+
+/* ===============================
+   13. ERROR PAGE
+================================ */
+.error-wrapper {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+}
+
+.error-box {
+    text-align:center;
+    color:white;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(12px);
+    padding: 60px 40px;
+    border-radius: 20px;
+}
+
+.error-code {
+    font-size: 100px;
+}
+
+/* ===============================
+   14. FOOTER
+================================ */
+footer {
+    text-align: center;
+    padding: 30px;
+    background: var(--primary);
+    color: white;
+    margin-top: 50px;
+}
+
+/* ===============================
+   15. RESPONSIVE
+================================ */
+@media (max-width: 768px) {
+    .card {
+        padding: 25px;
+    }
+
+    nav {
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}

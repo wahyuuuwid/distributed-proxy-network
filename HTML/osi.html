@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSI Model - IFLAB</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/iflab.png">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <img src="assets/iflab.png" alt="IFLAB Logo" width="70">
+    <h1>OSI Model</h1>
+    <p>The 7 Layers of Network Communication</p>
+</header>
+
+<!-- NAV -->
+<nav>
+    <a href="index.html">Home</a>
+    <a href="osi.html" class="active">OSI</a>
+    <a href="tcpip.html">TCP/IP</a>
+    <a href="qos.html">QoS</a>
+    <a href="implementation.html">Socket</a>
+
+    <button onclick="toggleDark()" style="margin-left:20px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;">
+        🌙
+    </button>
+</nav>
+
+<!-- INTRO -->
+<section class="card">
+    <h2>What is OSI Model?</h2>
+
+    <img src="assets/osi.png" alt="OSI Model Diagram" class="img-center">
+
+    <p>
+        The OSI (Open Systems Interconnection) model divides networking into 7 layers.
+        Each layer has a specific role in how data travels across a network.
+    </p>
+</section>
+
+<!-- VIDEO -->
+<section class="card">
+    <h2>🎥 OSI Model Explained</h2>
+
+    <video controls class="video-player">
+        <source src="assets/osi.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <p style="text-align:center; margin-top:10px;">
+        Watch how data moves through each layer.
+    </p>
+</section>
+
+<!-- INTERACTIVE -->
+<section class="card">
+    <h2>🔍 Click a Layer</h2>
+
+    <div class="osi-interactive">
+        <div onclick="showInfo(this, 'Application: HTTP, FTP, SMTP')">Layer 7 - Application</div>
+        <div onclick="showInfo(this, 'Presentation: Encryption, SSL/TLS')">Layer 6 - Presentation</div>
+        <div onclick="showInfo(this, 'Session: Connection control')">Layer 5 - Session</div>
+        <div onclick="showInfo(this, 'Transport: TCP/UDP, reliability')">Layer 4 - Transport</div>
+        <div onclick="showInfo(this, 'Network: IP, Routing')">Layer 3 - Network</div>
+        <div onclick="showInfo(this, 'Data Link: MAC Address, Switch')">Layer 2 - Data Link</div>
+        <div onclick="showInfo(this, 'Physical: Cable, Signal')">Layer 1 - Physical</div>
+    </div>
+
+    <p id="osi-info" style="margin-top:15px; font-weight:bold; text-align:center;"></p>
+</section>
+
+<!-- FLOW SECTION (NEW 🔥) -->
+<section class="card">
+    <h2>How Data Flows</h2>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>⬇️ Application → User request</div>
+        <div>⬇️ Transport → Add reliability (TCP)</div>
+        <div>⬇️ Network → Routing (IP)</div>
+        <div>⬇️ Physical → Send signal</div>
+    </div>
+</section>
+
+<!-- GRID -->
+<section class="grid">
+
+    <div class="box"><h3>Application</h3><p>HTTP, FTP</p></div>
+    <div class="box"><h3>Presentation</h3><p>Encryption</p></div>
+    <div class="box"><h3>Session</h3><p>Connection</p></div>
+    <div class="box"><h3>Transport</h3><p>TCP / UDP</p></div>
+    <div class="box"><h3>Network</h3><p>IP Routing</p></div>
+    <div class="box"><h3>Data Link</h3><p>MAC</p></div>
+    <div class="box"><h3>Physical</h3><p>Signal</p></div>
+
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 IFLAB | OSI Model</p>
+</footer>
+
+<script>
+function showInfo(el, text) {
+    document.getElementById("osi-info").innerText = text;
+
+    // highlight active
+    document.querySelectorAll(".osi-interactive div")
+        .forEach(d => d.style.background = "#e0e7ff");
+
+    el.style.background = "#a5b4fc";
+}
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>

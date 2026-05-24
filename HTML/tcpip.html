@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP/IP Model - IFLAB</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/iflab.png">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <img src="assets/iflab.png" alt="IFLAB Logo" width="70">
+    <h1>TCP/IP Model</h1>
+    <p>The 4 Layers of Internet Communication</p>
+</header>
+
+<!-- NAV -->
+<nav>
+    <a href="index.html">Home</a>
+    <a href="osi.html">OSI</a>
+    <a href="tcpip.html" class="active">TCP/IP</a>
+    <a href="qos.html">QoS</a>
+    <a href="implementation.html">Socket</a>
+
+    <button onclick="toggleDark()" style="margin-left:20px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;">
+        🌙
+    </button>
+</nav>
+
+<!-- INTRO -->
+<section class="card">
+    <h2>What is TCP/IP?</h2>
+
+    <img src="assets/tcpip.png" alt="TCP/IP Diagram" class="img-center">
+
+    <p>
+        TCP/IP is the communication model used on the Internet.
+        It consists of 4 layers that manage how data is sent and received.
+    </p>
+</section>
+
+<!-- INTERACTIVE -->
+<section class="card">
+    <h2>🔍 Click a Layer</h2>
+
+    <div class="tcpip-interactive">
+        <div onclick="showInfo(this, 'Application: HTTP, FTP, DNS')">Application</div>
+        <div onclick="showInfo(this, 'Transport: TCP reliable, UDP fast')">Transport</div>
+        <div onclick="showInfo(this, 'Internet: IP addressing and routing')">Internet</div>
+        <div onclick="showInfo(this, 'Network Access: Hardware & transmission')">Network Access</div>
+    </div>
+
+    <p id="tcpip-info" style="margin-top:15px; font-weight:bold; text-align:center;"></p>
+</section>
+
+<!-- FLOW (IMPROVED 🔥) -->
+<section class="card">
+    <h2>How Data Travels (Step-by-Step)</h2>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+        <div>1️⃣ Application → User sends request (HTTP)</div>
+        <div>2️⃣ Transport → TCP adds reliability & port</div>
+        <div>3️⃣ Internet → IP routes packet</div>
+        <div>4️⃣ Network → Data sent via cable/Wi-Fi</div>
+    </div>
+</section>
+
+<!-- COMPARISON (UPGRADE 🔥) -->
+<section class="card">
+    <h2>TCP/IP vs OSI</h2>
+
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+
+        <div class="box">
+            <h3>TCP/IP</h3>
+            <ul>
+                <li>4 Layers</li>
+                <li>Used in real networks</li>
+                <li>Practical model</li>
+            </ul>
+        </div>
+
+        <div class="box">
+            <h3>OSI</h3>
+            <ul>
+                <li>7 Layers</li>
+                <li>Theoretical model</li>
+                <li>Learning framework</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+
+<!-- EXTRA INSIGHT (NEW 🔥) -->
+<section class="card">
+    <h2>Mapping to OSI</h2>
+
+    <p>
+        TCP/IP layers correspond to OSI layers:
+    </p>
+
+    <ul>
+        <li>Application → OSI Layer 5–7</li>
+        <li>Transport → OSI Layer 4</li>
+        <li>Internet → OSI Layer 3</li>
+        <li>Network Access → OSI Layer 1–2</li>
+    </ul>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 IFLAB | TCP/IP Model</p>
+</footer>
+
+<script>
+function showInfo(el, text) {
+    document.getElementById("tcpip-info").innerText = text;
+
+    // highlight active
+    document.querySelectorAll(".tcpip-interactive div")
+        .forEach(d => d.style.background = "#e0e7ff");
+
+    el.style.background = "#a5b4fc";
+}
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
