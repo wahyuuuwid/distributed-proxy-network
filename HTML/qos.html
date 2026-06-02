@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quality of Service (QoS) - IFLAB</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/iflab.png">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <img src="assets/iflab.png" alt="IFLAB Logo" width="70">
+    <h1>Quality of Service (QoS)</h1>
+    <p>Managing Network Performance & Reliability</p>
+</header>
+
+<!-- NAV -->
+<nav>
+    <a href="index.html">Home</a>
+    <a href="osi.html">OSI</a>
+    <a href="tcpip.html">TCP/IP</a>
+    <a href="qos.html" class="active">QoS</a>
+    <a href="implementation.html">Socket</a>
+
+    <button onclick="toggleDark()" style="margin-left:20px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;">
+        🌙
+    </button>
+</nav>
+
+<!-- INTRO -->
+<section class="card">
+    <h2>What is QoS?</h2>
+
+    <p>
+        Quality of Service (QoS) ensures that important network traffic 
+        gets priority and performs well.
+    </p>
+
+    <p>
+        It controls delay, speed, and reliability of data transmission.
+    </p>
+</section>
+
+<!-- INTERACTIVE -->
+<section class="card">
+    <h2>🔍 Click a Metric</h2>
+
+    <div class="qos-interactive">
+        <div onclick="showInfo(this, 'Latency: Delay of packet delivery (lower is better)')">Latency</div>
+        <div onclick="showInfo(this, 'Throughput: Data transfer speed (higher is better)')">Throughput</div>
+        <div onclick="showInfo(this, 'Packet Loss: Lost data (should be near zero)')">Packet Loss</div>
+        <div onclick="showInfo(this, 'Jitter: Delay variation (should be stable)')">Jitter</div>
+    </div>
+
+    <p id="qos-info" style="margin-top:15px; font-weight:bold; text-align:center;"></p>
+</section>
+
+<!-- VISUAL COMPARISON (NEW 🔥) -->
+<section class="card">
+    <h2>Good vs Bad Network</h2>
+
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+
+        <div class="box">
+            <h3>✅ Good QoS</h3>
+            <ul>
+                <li>Low latency</li>
+                <li>High throughput</li>
+                <li>No packet loss</li>
+                <li>Stable jitter</li>
+            </ul>
+        </div>
+
+        <div class="box">
+            <h3>❌ Poor QoS</h3>
+            <ul>
+                <li>High delay</li>
+                <li>Slow speed</li>
+                <li>Packet drops</li>
+                <li>Unstable connection</li>
+            </ul>
+        </div>
+
+    </div>
+</section>
+
+<!-- REAL LIFE (IMPROVED) -->
+<section class="card">
+    <h2>QoS in Real Life</h2>
+
+    <div style="display:flex; flex-direction:column; gap:15px;">
+
+        <div>📹 Streaming → needs high throughput (no buffering)</div>
+        <div>🎙️ Video Call → needs low latency & jitter</div>
+        <div>🎮 Gaming → needs low latency & packet loss</div>
+
+    </div>
+</section>
+
+<!-- CONNECTION TO ERROR (NEW 🔥) -->
+<section class="card">
+    <h2>QoS & Network Errors</h2>
+
+    <p>
+        Poor QoS can lead to network failures:
+    </p>
+
+    <ul>
+        <li>High latency → can cause <b>504 Gateway Timeout</b></li>
+        <li>Packet loss → incomplete data transfer</li>
+        <li>Low throughput → slow loading pages</li>
+    </ul>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 IFLAB | QoS Analysis</p>
+</footer>
+
+<script>
+function showInfo(el, text) {
+    document.getElementById("qos-info").innerText = text;
+
+    // highlight active
+    document.querySelectorAll(".qos-interactive div")
+        .forEach(d => d.style.background = "#e0e7ff");
+
+    el.style.background = "#a5b4fc";
+}
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>

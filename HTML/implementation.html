@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket Implementation - IFLAB</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="icon" href="assets/iflab.png">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<header>
+    <img src="assets/iflab.png" alt="IFLAB Logo" width="70">
+    <h1>Socket Programming</h1>
+    <p>Client–Server Communication using TCP/IP</p>
+</header>
+
+<!-- NAV -->
+<nav>
+    <a href="index.html">Home</a>
+    <a href="osi.html">OSI</a>
+    <a href="tcpip.html">TCP/IP</a>
+    <a href="qos.html">QoS</a>
+    <a href="implementation.html" class="active">Socket</a>
+
+    <button onclick="toggleDark()" style="margin-left:20px;padding:6px 12px;border-radius:8px;border:none;cursor:pointer;">
+        🌙
+    </button>
+</nav>
+
+<!-- INTRO -->
+<section class="card">
+    <h2>What is Socket Programming?</h2>
+    <p>
+        Socket programming allows communication between client and server 
+        using TCP/IP protocols.
+    </p>
+    <p>
+        It is the foundation of web applications where browser sends request 
+        and server returns response.
+    </p>
+</section>
+
+<!-- VIDEO (FIXED ✅) -->
+<section class="card">
+    <h2>🎥 How Socket Works</h2>
+
+    <div class="video-container">
+        <iframe 
+            src="https://www.youtube.com/embed/NvZEZ-mZsuI"
+            frameborder="0"
+            allowfullscreen>
+        </iframe>
+    </div>
+</section>
+
+<!-- FLOW -->
+<section class="card">
+    <h2>Client–Server Flow</h2>
+
+    <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap; font-weight:bold;">
+        <div class="step-box" onclick="showFlow(this, 'Client sends request')">Client</div>
+        ➔
+        <div class="step-box" onclick="showFlow(this, 'Request via TCP/IP')">Request</div>
+        ➔
+        <div class="step-box" onclick="showFlow(this, 'Server processes request')">Server</div>
+        ➔
+        <div class="step-box" onclick="showFlow(this, 'Server sends response')">Response</div>
+    </div>
+
+    <p id="flow-info" style="margin-top:15px; text-align:center; font-weight:bold;"></p>
+</section>
+
+<!-- PACKET FLOW (CSS GLOBAL) -->
+<section class="card">
+    <h2>📡 Packet Flow Animation</h2>
+
+    <div class="packet-flow">
+        <div class="node client">Client</div>
+        <div class="node server">Server</div>
+
+        <div class="packet request"></div>
+        <div class="packet response"></div>
+    </div>
+
+    <p style="text-align:center;">
+        🔵 Request → 🟢 Response
+    </p>
+</section>
+
+<!-- SIMULATOR (FIXED ✅) -->
+<section class="card">
+    <h2>🧪 Request–Response Simulator</h2>
+
+    <div style="display:flex; flex-direction:column; gap:10px; max-width:400px; margin:auto;">
+        <input id="url" placeholder="Enter path (e.g. /osi)" 
+               style="padding:10px; border-radius:8px; border:none;">
+
+        <button onclick="simulateRequest()" class="btn">
+            Send Request
+        </button>
+    </div>
+
+    <p id="sim-result" style="margin-top:15px; text-align:center; font-weight:bold;"></p>
+</section>
+
+<!-- SERVER PROCESS -->
+<section class="card">
+    <h2>How Server Works</h2>
+
+    <div style="display:flex; flex-direction:column; gap:10px;">
+        <div class="step-box" onclick="showFlow(this, 'Browser sends GET request')">1. Client Request</div>
+        <div class="step-box" onclick="showFlow(this, 'Server accepts connection')">2. Socket Accept</div>
+        <div class="step-box" onclick="showFlow(this, 'Server reads file')">3. File Processing</div>
+        <div class="step-box" onclick="showFlow(this, 'Server sends response')">4. HTTP Response</div>
+    </div>
+</section>
+
+<!-- CODE -->
+<section class="card">
+    <h2>Basic Socket Code (Python)</h2>
+
+    <div style="background:#1e1e1e;color:#d4d4d4;padding:20px;border-radius:8px;font-family:monospace;">
+<pre><code>
+import socket
+
+tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+</code></pre>
+    </div>
+
+    <p style="margin-top:10px;">
+        TCP is reliable, UDP is faster but less reliable.
+    </p>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <p>&copy; 2026 IFLAB | Socket Implementation</p>
+</footer>
+
+<!-- SCRIPT -->
+<script>
+function showFlow(el, text) {
+    document.getElementById("flow-info").innerText = text;
+
+    document.querySelectorAll(".step-box")
+        .forEach(d => d.classList.remove("active-box"));
+
+    el.classList.add("active-box");
+}
+
+function simulateRequest() {
+    let url = document.getElementById("url").value;
+    let result = document.getElementById("sim-result");
+
+    const routes = ["/", "/osi", "/tcpip", "/qos", "/implementation"];
+
+    if (!url) {
+        result.innerText = "⚠️ Enter a path";
+        return;
+    }
+
+    if (routes.includes(url)) {
+        result.innerText = "✅ 200 OK";
+        result.style.color = "lightgreen";
+    } else if (url === "/timeout") {
+        result.innerText = "⏱ 504 Gateway Timeout";
+        result.style.color = "orange";
+    } else if (url === "/gateway") {
+        result.innerText = "🔌 502 Bad Gateway";
+        result.style.color = "orange";
+    } else {
+        result.innerText = "❌ 404 Not Found";
+        result.style.color = "red";
+    }
+}
+
+function toggleDark() {
+    document.body.classList.toggle("dark");
+}
+</script>
+
+</body>
+</html>
