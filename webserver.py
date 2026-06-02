@@ -180,7 +180,7 @@ def main():
         # Menunggu thread menyelesaikan tugas terakhirnya dengan rapi
         tcp_thread.join()
         udp_thread.join()
-        print("[SHUTDOWN] Server TCP & UDP berhasil dimatikan secara bersih. Sukses tubesnya!")
+        print("[SHUTDOWN] Server TCP & UDP berhasil dimatikan!")
 
 if __name__ == '__main__':
     main()
