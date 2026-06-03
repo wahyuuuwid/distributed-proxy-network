@@ -3,7 +3,7 @@ from socket import *
 BUFFER_SIZE = 4096
 
 # Default langsung tanpa argumen
-serverName = '127.0.0.1'
+serverName = '127.0.0.1'  # Ganti dengan IP server jika tidak di localhost
 serverPort = 8080
 filePath = '/index.html'
 
