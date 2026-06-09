@@ -86,7 +86,6 @@ proxy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
 proxy.bind(("127.0.0.1", 8080))
 proxy.listen()
-
 print("Proxy listening on port 8080")
 
 while True:
