@@ -1,17 +1,31 @@
-import socket, threading, os
+import socket
+import threading
+import os
 
 CACHE = "cache"
 os.makedirs(CACHE, exist_ok=True)
-
-lock = threading.Lock()  # mencegah race condition
+lock = threading.Lock()
 
 def handle(client, addr):
     print(f"[CONNECT] {addr}")
 
     try:
         req = client.recv(4096)
-        path = req.decode(errors="ignore").split(" ")[1]
-        file = CACHE + "/" + path.replace("/", "_")
+
+        # request kosong
+        if not req:
+            return
+
+        parts = req.decode(errors="ignore").split()
+
+        # request tidak valid
+        if len(parts) < 2:
+            print("[ERROR] Invalid HTTP request")
+            client.sendall(b"HTTP/1.1 400 Bad Request\r\nContent-Length:0\r\n\r\n")
+            return
+
+        path = parts[1]
+        file = os.path.join(CACHE, path.replace("/", "_"))
 
         with lock:
             cache_exist = os.path.exists(file)
@@ -33,15 +47,19 @@ def handle(client, addr):
                 server.sendall(req)
 
                 response = b""
-                while data := server.recv(4096):
+                while True:
+                    data = server.recv(4096)
+                    if not data:
+                        break
                     response += data
+
+                server.close()
 
                 with lock:
                     with open(file, "wb") as f:
                         f.write(response)
 
                 client.sendall(response)
-                server.close()
 
             except ConnectionRefusedError:
                 print("[ERROR 502] Backend unreachable")
@@ -62,7 +80,10 @@ def handle(client, addr):
         client.close()
         print(f"[DISCONNECT] {addr}")
 
+
 proxy = socket.socket()
+proxy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
 proxy.bind(("127.0.0.1", 8080))
 proxy.listen()
 
