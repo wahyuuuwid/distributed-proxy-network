@@ -2,6 +2,9 @@ import socket
 import threading
 import os
 
+PROXY_PORT = 8080
+SERVER_ADDR = ("127.0.0.1", 8000)
+
 CACHE = "cache"
 os.makedirs(CACHE, exist_ok=True)
 lock = threading.Lock()
@@ -42,7 +45,7 @@ def handle(client, addr):
             try:
                 server = socket.socket()
                 server.settimeout(5)
-                server.connect(("127.0.0.1", 8000))
+                server.connect(SERVER_ADDR)
                 server.sendall(req)
 
                 response = b""
