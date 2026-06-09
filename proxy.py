@@ -2,7 +2,7 @@ import socket
 import threading
 import os
 
-PROXY_PORT = 8080
+PROXY_ADDR = ("0.0.0.0", 8080)
 SERVER_ADDR = ("127.0.0.1", 8000)
 
 CACHE = "cache"
@@ -87,9 +87,9 @@ def handle(client, addr):
 proxy = socket.socket()
 proxy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
-proxy.bind(("127.0.0.1", 8080))
+proxy.bind(PROXY_ADDR)
 proxy.listen()
-print("Proxy listening on port 8080")
+print(f"Proxy listening on {PROXY_ADDR}")
 
 while True:
     client, addr = proxy.accept()
