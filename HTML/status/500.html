@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Internal Server Error</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="../assets/iflab.png">
+
+    <style>
+        body {
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            background: linear-gradient(135deg, #1e3a8a, #764ba2);
+        }
+
+        .error-container {
+            text-align:center;
+            color:white;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(12px);
+            padding: 60px 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            animation: fadeUp 0.8s ease;
+        }
+
+        .error-code {
+            font-size: 100px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .btn-group a {
+            display:inline-block;
+            margin:10px;
+            padding:12px 25px;
+            border-radius:30px;
+            text-decoration:none;
+            font-weight:bold;
+        }
+
+        .btn-home {
+            background:white;
+            color:#1e3a8a;
+        }
+
+        .btn-retry {
+            background: rgba(255,255,255,0.2);
+            color:white;
+        }
+
+        .btn-group a:hover {
+            transform: scale(1.05);
+        }
+
+        .info {
+            margin-top:15px;
+            font-size:0.9rem;
+            opacity:0.8;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="error-container">
+
+    <h1 class="error-code">500</h1>
+    <h2>Internal Server Error</h2>
+
+    <p>
+        Something went wrong on the server while processing your request.
+    </p>
+
+    <!-- INFO -->
+    <p class="info">
+        Requested URL: <span id="path"></span>
+    </p>
+
+    <!-- BUTTON -->
+    <div class="btn-group">
+        <a href="../index.html" class="btn-home">🏠 Home</a>
+        <a href="#" onclick="retry()" class="btn-retry">🔄 Retry</a>
+    </div>
+
+    <p class="info">
+        Tip: This usually happens due to server-side logic or routing errors.
+    </p>
+
+</div>
+
+<script>
+/* tampilkan path */
+document.getElementById("path").innerText = window.location.pathname;
+
+/* retry function */
+function retry() {
+    location.reload();
+}
+</script>
+
+</body>
+</html>

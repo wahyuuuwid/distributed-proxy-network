@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>504 - Gateway Timeout</title>
+
+    <link rel="stylesheet" href="../css/style.css">
+    <link rel="icon" href="../assets/iflab.png">
+
+    <style>
+        body {
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            min-height:100vh;
+            background: linear-gradient(135deg, #0f172a, #1e3a8a);
+        }
+
+        .error-container {
+            text-align:center;
+            color:white;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(12px);
+            padding: 60px 40px;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            animation: fadeUp 0.8s ease;
+        }
+
+        .error-code {
+            font-size: 100px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .btn-group a {
+            display:inline-block;
+            margin:10px;
+            padding:12px 25px;
+            border-radius:30px;
+            text-decoration:none;
+            font-weight:bold;
+        }
+
+        .btn-home {
+            background:white;
+            color:#1e3a8a;
+        }
+
+        .btn-retry {
+            background: rgba(255,255,255,0.2);
+            color:white;
+        }
+
+        .btn-group a:hover {
+            transform: scale(1.05);
+        }
+
+        .info {
+            margin-top:15px;
+            font-size:0.9rem;
+            opacity:0.85;
+        }
+
+        .timer {
+            font-size:1.2rem;
+            margin-top:10px;
+            font-weight:bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="error-container">
+
+    <h1 class="error-code">504</h1>
+    <h2>Gateway Timeout</h2>
+
+    <p>
+        The server took too long to respond.
+    </p>
+
+    <!-- INFO -->
+    <p class="info">
+        Requested URL: <span id="path"></span>
+    </p>
+
+    <p class="info">
+        Possible causes:
+        <br>• High network latency
+        <br>• Server overload
+        <br>• Slow upstream response
+    </p>
+
+    <!-- TIMER VISUAL -->
+    <div class="timer">
+        ⏱ Timeout reached
+    </div>
+
+    <!-- BUTTON -->
+    <div class="btn-group">
+        <a href="../index.html" class="btn-home">🏠 Home</a>
+        <a href="#" onclick="retry()" class="btn-retry">🔄 Try Again</a>
+    </div>
+
+    <p class="info">
+        Tip: This error is related to delay (QoS - Latency).
+    </p>
+
+</div>
+
+<script>
+/* tampilkan path */
+document.getElementById("path").innerText = window.location.pathname;
+
+/* retry */
+function retry() {
+    location.reload();
+}
+</script>
+
+</body>
+</html>

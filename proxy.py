@@ -53,6 +53,7 @@ def handle(client, addr):
                     data = server.recv(4096)
                     if not data:
                         break
+
                     response += data
 
                 server.close()

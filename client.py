@@ -6,10 +6,10 @@ import time
 PROXY_HOST = '127.0.0.1'
 PROXY_PORT = 8080
 
-def send_request(path='/', num_requests=3):
-    """Send HTTP request ke proxy dan tampilkan hasilnya"""
-    print(f"\n[CLIENT] Sending {num_requests} requests to {path}")
-    print("=" * 60)
+# Default langsung tanpa argumen
+serverName = '127.0.0.1'  # Ganti dengan IP server jika tidak di localhost
+serverPort = 8080
+filePath = '/index.html'
 
     for i in range(num_requests):
         try:
