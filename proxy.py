@@ -1,197 +1,100 @@
 import socket
-import time
+import threading
+import os
 
-# Proxy Configuration
-PROXY_HOST = '0.0.0.0'
 PROXY_PORT = 8080
+SERVER_ADDR = ("127.0.0.1", 8000)
 
-# Backend Server (WebServer)
-BACKEND_HOST = '10.101.48.84'
-BACKEND_PORT = 8000
+CACHE = "cache"
+os.makedirs(CACHE, exist_ok=True)
+lock = threading.Lock()
 
-# Cache Configuration
-CACHE_TTL = 300  # 5 minutes
+def handle(client, addr):
+    print(f"[CONNECT] {addr}")
 
+    try:
+        req = client.recv(4096)
+        # request kosong
+        if not req:
+            return
 
-class CachingForwardProxy:
-    def __init__(self):
-        # {path: (response_bytes, timestamp)}
-        self.cache = {}
+        parts = req.decode(errors="ignore").split()
 
-    def extract_path(self, request_line):
-        """Extract request path dari HTTP request line"""
-        try:
-            parts = request_line.split(' ')
-            return parts[1]
-        except Exception:
-            return None
+        # request tidak valid
+        if len(parts) < 2:
+            print("[ERROR] Invalid HTTP request")
+            client.sendall(b"HTTP/1.1 400 Bad Request\r\nContent-Length:0\r\n\r\n")
+            return
 
-    def is_cache_valid(self, cache_time):
-        """Check cache TTL validity"""
-        return (time.time() - cache_time) < CACHE_TTL
+        path = parts[1]
+        file = os.path.join(CACHE, path.replace("/", "_"))
 
-    def handle_client(self, client_socket, client_address):
-        print(f"[CONNECT] Client: {client_address[0]}:{client_address[1]}")
+        with lock:
+            cache_exist = os.path.exists(file)
 
-        try:
-            # Receive request from client
-            request = client_socket.recv(4096)
+        if cache_exist:
+            print(f"[CACHE HIT] {path}")
 
-            if not request:
-                return
+            with open(file, "rb") as f:
+                client.sendall(f.read())
 
-            request_str = request.decode('utf-8', errors='ignore')
-            request_line = request_str.split('\n')[0]
-            path = self.extract_path(request_line)
-
-            print(f"[REQUEST] {request_line}")
-
-            # Check cache
-            if path and path in self.cache:
-                cached_response, cache_time = self.cache[path]
-
-                if self.is_cache_valid(cache_time):
-                    print(f"[CACHE HIT] {path}")
-                    client_socket.sendall(cached_response)
-                    print(f"[SUCCESS] Cached response sent")
-                    return
-                else:
-                    print(f"[CACHE EXPIRED] {path}")
-                    del self.cache[path]
-
-            # Forward request to backend server
-            print(f"[FORWARD] To {BACKEND_HOST}:{BACKEND_PORT}")
-
-            backend_socket = socket.socket(
-                socket.AF_INET,
-                socket.SOCK_STREAM
-            )
+        else:
+            print(f"[CACHE MISS] {path}")
+            print(f"[FORWARD] {path} -> 127.0.0.1:8000")
 
             try:
-                backend_socket.connect(
-                    (BACKEND_HOST, BACKEND_PORT)
-                )
+                server = socket.socket()
+                server.settimeout(5)
+                server.connect(SERVER_ADDR)
+                server.sendall(req)
 
-                backend_socket.sendall(request)
-
-                # Receive full response from backend
-                response = b''
-
+                response = b""
                 while True:
-                    data = backend_socket.recv(4096)
-
+                    data = server.recv(4096)
                     if not data:
                         break
 
                     response += data
 
-                backend_socket.close()
+                server.close()
 
-                # Store in cache
-                if path:
-                    self.cache[path] = (
-                        response,
-                        time.time()
-                    )
+                with lock:
+                    with open(file, "wb") as f:
+                        f.write(response)
 
-                    print(
-                        f"[CACHED] {path} "
-                        f"({len(response)} bytes)"
-                    )
-
-                # Send response to client
-                client_socket.sendall(response)
-
-                print(
-                    f"[SUCCESS] "
-                    f"{len(response)} bytes sent"
-                )
+                client.sendall(response)
 
             except ConnectionRefusedError:
-                print(
-                    f"[ERROR] Backend unreachable at "
-                    f"{BACKEND_HOST}:{BACKEND_PORT}"
+                print("[ERROR 502] Backend unreachable")
+                client.sendall(
+                    b"HTTP/1.1 502 Bad Gateway\r\nContent-Length:0\r\n\r\n"
                 )
 
-                error_response = (
-                    b"HTTP/1.1 502 Bad Gateway\r\n"
-                    b"Content-Length: 0\r\n"
-                    b"\r\n"
+            except socket.timeout:
+                print("[ERROR 504] Gateway Timeout")
+                client.sendall(
+                    b"HTTP/1.1 504 Gateway Timeout\r\nContent-Length:0\r\n\r\n"
                 )
 
-                client_socket.sendall(error_response)
+    except Exception as e:
+        print("[ERROR]", e)
 
-            except Exception as e:
-                print(f"[ERROR] {e}")
-
-        except Exception as e:
-            print(f"[EXCEPTION] {e}")
-
-        finally:
-            client_socket.close()
-            print(f"[DISCONNECT] {client_address[0]}\n")
-
-    def start(self):
-        server_socket = socket.socket(
-            socket.AF_INET,
-            socket.SOCK_STREAM
-        )
-
-        server_socket.setsockopt(
-            socket.SOL_SOCKET,
-            socket.SO_REUSEADDR,
-            1
-        )
-
-        try:
-            server_socket.bind(
-                (PROXY_HOST, PROXY_PORT)
-            )
-
-            server_socket.listen(5)
-            server_socket.settimeout(1.0)
-
-            print(
-                f"[INFO] Forward Caching Proxy at "
-                f"{PROXY_HOST}:{PROXY_PORT}"
-            )
-
-            print(
-                f"[INFO] Backend: "
-                f"{BACKEND_HOST}:{BACKEND_PORT}"
-            )
-
-            print(
-                f"[INFO] Cache TTL: "
-                f"{CACHE_TTL}s"
-            )
-
-            print(
-                "[INFO] Waiting for requests "
-                "(Ctrl+C to stop)\n"
-            )
-
-            while True:
-                try:
-                    client_socket, client_address = (
-                        server_socket.accept()
-                    )
-
-                    self.handle_client(
-                        client_socket,
-                        client_address
-                    )
-
-                except socket.timeout:
-                    continue
-
-        except KeyboardInterrupt:
-            print("\n[SHUTDOWN] Proxy stopped")
-
-        finally:
-            server_socket.close()
+    finally:
+        client.close()
+        print(f"[DISCONNECT] {addr}")
 
 
-if __name__ == '__main__':
-    proxy = CachingForwardProxy()
-    proxy.start()
+proxy = socket.socket()
+proxy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
+proxy.bind(("127.0.0.1", 8080))
+proxy.listen()
+print("Proxy listening on port 8080")
+
+while True:
+    client, addr = proxy.accept()
+    threading.Thread(
+        target=handle,
+        args=(client, addr),
+        daemon=True
+    ).start()
