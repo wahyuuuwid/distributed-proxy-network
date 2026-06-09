@@ -2,9 +2,10 @@ import socket
 import os
 import threading
 
-# Konfigurasi Network Server
-HOST = '0.0.0.0'  # Listen di semua interface aktif agar tidak validcontext error
-PORT = 8000       # Port akses sesuai topologi kelompok
+# Konfigurasi Port Jaringan Sesuai Spesifikasi Modul
+HOST = '0.0.0.0'
+TCP_PORT = 8000  # Port untuk Web Server & valid file request via Proxy
+UDP_PORT = 9000  # Port untuk pengujian UDP Echo
 
 def get_content_type(filepath):
     if filepath.endswith('.html') or filepath.endswith('.htm'):
@@ -20,10 +21,13 @@ def get_content_type(filepath):
     else:
         return "application/octet-stream"
 
-# ==================== [ HANDLER PROTOKOL TCP ] ====================
+# ==================== [ HANDLER PROTOKOL TCP (PORT 8000) ] ====================
 
 def handle_tcp_client(client_socket, client_address):
-    print(f"[TCP-CONNECT] Koneksi masuk dari Client: {client_address[0]}:{client_address[1]}")
+    # Poin 5: Menampilkan pembuatan thread baru untuk tiap koneksi secara eksplisit di log
+    current_thread_name = threading.current_thread().name
+    print(f"[THREAD-CREATE] {current_thread_name} dialokasikan untuk melayani Client: {client_address[0]}:{client_address[1]}")
+    
     try:
         request = client_socket.recv(4096).decode('utf-8')
         if not request:
@@ -43,8 +47,10 @@ def handle_tcp_client(client_socket, client_address):
         else:
             filepath = os.path.join('HTML', requested_file.lstrip('/'))
 
-        print(f"[TCP-REQUEST] Meminta file: {filepath}")
+        # Mencatat log aktivitas IP Proxy / Client
+        print(f"[{current_thread_name}-REQUEST] Menerima permintaan berkas: {filepath} dari IP: {client_address[0]}")
 
+        # Permintaan Berkas Valid (200 OK)
         if os.path.exists(filepath) and os.path.isfile(filepath):
             content_type = get_content_type(filepath)
             with open(filepath, 'rb') as f:
@@ -56,109 +62,88 @@ def handle_tcp_client(client_socket, client_address):
             response_header += "Connection: close\r\n\r\n"
             
             client_socket.sendall(response_header.encode('utf-8') + content)
-            print(f"[TCP-SUCCESS] Berhasil mengirim {filepath}")
+            print(f"[{current_thread_name}-SUCCESS] Response 200 OK + konten dikirim ke {client_address[0]}")
+        
+        # Permintaan Berkas Tidak Ditemukan (404 Not Found)
         else:
-            not_found_msg = "<h1>404 Not Found</h1><p>File tidak ditemukan (TCP Mode).</p>"
+            not_found_msg = "<h1>404 Not Found</h1><p>File tidak ditemukan di Web Server.</p>"
             response_header = "HTTP/1.1 404 Not Found\r\n"
             response_header += "Content-Type: text/html\r\n"
             response_header += f"Content-Length: {len(not_found_msg)}\r\n"
             response_header += "Connection: close\r\n\r\n"
             
             client_socket.sendall(response_header.encode('utf-8') + not_found_msg.encode('utf-8'))
-            print(f"[TCP-ERROR] 404 Not Found: {filepath}")
+            print(f"[{current_thread_name}-GALAT] Response 404 Not Found dicatat untuk file: {filepath}")
 
     except Exception as e:
-        print(f"[TCP-EXCEPTION] Error terjadi: {e}")
+        print(f"[{current_thread_name}-EXCEPTION] Galat internal: {e}")
     finally:
         client_socket.close()
+        print(f"[THREAD-TERMINATE] {current_thread_name} selesai bertugas.\n")
 
 def listen_tcp(stop_event):
     tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     tcp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    tcp_socket.bind((HOST, PORT))
-    tcp_socket.listen(5)
+    tcp_socket.bind((HOST, TCP_PORT))
+    tcp_socket.listen(10)
     tcp_socket.settimeout(1.0)
     
+    thread_counter = 1
     while not stop_event.is_set():
         try:
             client_socket, client_address = tcp_socket.accept()
-            tcp_thread = threading.Thread(target=handle_tcp_client, args=(client_socket, client_address))
+            # Membuat nama thread dinamis untuk mempermudah penilaian konkurensi di log
+            t_name = f"ThreadClient-{thread_counter}"
+            tcp_thread = threading.Thread(target=handle_tcp_client, args=(client_socket, client_address), name=t_name)
             tcp_thread.start()
+            thread_counter += 1
         except socket.timeout:
             continue
     tcp_socket.close()
 
-# ==================== [ HANDLER PROTOKOL UDP ] ====================
+# ==================== [ HANDLER PROTOKOL UDP ECHO (PORT 9000) ] ====================
 
 def listen_udp(stop_event):
     udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    udp_socket.bind((HOST, PORT))
+    udp_socket.bind((HOST, UDP_PORT))
     udp_socket.settimeout(1.0)
     
     while not stop_event.is_set():
         try:
+            # Pengujian UDP Echo
             data, client_address = udp_socket.recvfrom(4096)
-            request = data.decode('utf-8', errors='ignore').strip()
-            if not request:
+            if not data:
                 continue
                 
-            print(f"[UDP-CONNECT] Paket QoS masuk dari Client: {client_address[0]}:{client_address[1]}")
-            print(f"[UDP-DATA-RAW] Isi request: {request}")
+            print(f"[UDP-ECHO] Menerima paket dari {client_address[0]}:{client_address[1]}")
+            print(f"[UDP-PAYLOAD] Data: {data}")
             
-            # Pengaman parsing: Jika client mengirim request mentah atau custom flag dari client.py
-            # Kita deteksi apakah ada keyword path file di dalamnya
-            filepath = os.path.join('HTML', 'index.html') # default fallback
-            
-            try:
-                if 'GET' in request:
-                    parts = request.split('\n')[0].split(' ')
-                    if len(parts) >= 2 and parts[1] != '/':
-                        filepath = os.path.join('HTML', parts[1].lstrip('/'))
-                elif '/' in request:
-                    # Jika client hanya mengirim path seperti "/index.html" atau "osi.html"
-                    filepath = os.path.join('HTML', request.lstrip('/'))
-            except Exception:
-                pass
-
-            print(f"[UDP-REQUEST] Menghitung estimasi throughput untuk file: {filepath}")
-
-            if os.path.exists(filepath) and os.path.isfile(filepath):
-                content_type = get_content_type(filepath)
-                with open(filepath, 'rb') as f:
-                    content = f.read()
-                
-                response_header = "HTTP/1.1 200 OK\r\n"
-                response_header += f"Content-Type: {content_type}\r\n"
-                response_header += f"Content-Length: {len(content)}\r\n\r\n"
-                
-                # Kirim data balik via Datagram UDP
-                udp_socket.sendto(response_header.encode('utf-8') + content, client_address)
-                print(f"[UDP-SUCCESS] Paket file berhasil ditembak balik ke client!")
-            else:
-                not_found_msg = "HTTP/1.1 404 Not Found\r\n\r\n<h1>404 File Not Found (UDP Mode)</h1>"
-                udp_socket.sendto(not_found_msg.encode('utf-8'), client_address)
-                print(f"[UDP-ERROR] File {filepath} tidak ditemukan")
+            # Memantulkan kembali data/payload yang identik 100% tanpa modifikasi (Echo)
+            udp_socket.sendto(data, client_address)
+            print(f"[UDP-SUCCESS] Memantulkan kembali payload identik (echo) ke client.\n")
                 
         except socket.timeout:
             continue
         except Exception as e:
-            print(f"[UDP-EXCEPTION] Error: {e}")
+            print(f"[UDP-EXCEPTION] Galat: {e}")
             
     udp_socket.close()
 
-# ==================== [ MAIN ] ====================
+# ==================== [ MAIN ENGINE ] ====================
 
 def main():
     stop_event = threading.Event()
-    tcp_thread = threading.Thread(target=listen_tcp, args=(stop_event,))
-    udp_thread = threading.Thread(target=listen_udp, args=(stop_event,))
+    tcp_thread = threading.Thread(target=listen_tcp, args=(stop_event,), name="TCPListener")
+    udp_thread = threading.Thread(target=listen_udp, args=(stop_event,), name="UDPListener")
     
     try:
         tcp_thread.start()
         udp_thread.start()
-        print(f"[SYSTEM] Dual Web Server Aktif di Port {PORT} (Mendukung Multi-mode Client)")
-        print("[SYSTEM] Siap menerima pengujian '--mode tcp' dan '--mode udp'\n")
+        
+        # Poin 1: Output log awal wajib sesuai format instruksi praktikum
+        print(f'Log: "Server running on port {TCP_PORT}/{UDP_PORT}", thread pool siap')
+        print("[SYSTEM] Tekan Ctrl+C untuk mematikan secara bersih...\n")
         
         while True:
             tcp_thread.join(timeout=1.0)
@@ -166,11 +151,11 @@ def main():
             if not tcp_thread.is_alive() and not udp_thread.is_alive():
                 break
     except KeyboardInterrupt:
-        print("\n[SHUTDOWN] Mematikan server secara bersih...")
+        print("\n[SHUTDOWN] Menutup semua socket dan mematikan server...")
         stop_event.set()
         tcp_thread.join()
         udp_thread.join()
-        print("[SHUTDOWN] Selesai.")
+        print("[SHUTDOWN] Server mati dengan bersih.")
 
 if __name__ == '__main__':
     main()
