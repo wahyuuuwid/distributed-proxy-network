@@ -2,7 +2,7 @@ import socket
 import threading
 import os
 
-PROXY_ADDR = ("127.0.0.1", 8080)
+PROXY_ADDR = ("0.0.0.0", 8080)
 SERVER_ADDR = ("127.0.0.1", 8000)
 
 CACHE = "cache"
