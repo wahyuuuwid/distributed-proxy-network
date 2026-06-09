@@ -11,7 +11,6 @@ def handle(client, addr):
 
     try:
         req = client.recv(4096)
-
         # request kosong
         if not req:
             return
