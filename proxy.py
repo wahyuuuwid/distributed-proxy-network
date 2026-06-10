@@ -84,6 +84,21 @@ def handle(client, addr):
         print(f"[DISCONNECT] {addr}")
 
 
+def udp_proxy():
+    proxy_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    proxy_udp.bind(("0.0.0.0", 9090))
+
+    while True:
+        data, addr = proxy_udp.recvfrom(1024)
+
+        server_udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        server_udp.sendto(data, ("127.0.0.1", 9000))
+
+        print(f"[UDP FORWARD] {addr} -> 127.0.0.1:9000")
+
+
+threading.Thread(target=udp_proxy, daemon=True).start()
+
 proxy = socket.socket()
 proxy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
